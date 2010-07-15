@@ -1,16 +1,23 @@
+var ___rootObj = this;
+
 (function() {
 /**
+ * http://github.com/nostrademons/hash.js/blob/master/hash.js
+ *
  * Hashtable implementation.  This provides a 'length' property that's
  * maintained throughout all updates, and has no restrictions upon the
  * types of keys that may be used.
+ *
+ * Anentropic: I borrowed the popitem method from Python dictionary and changed
+ * 'put' to 'set' (complements 'get')
  * 
  * @class Hash
  */
-if(typeof window.Hash != 'undefined') {
-    var _Hash = window.Hash;
+if(typeof ___rootObj.Hash != 'undefined') {
+    var _Hash = ___rootObj.Hash;
 }
 
-var Hash = window.Hash = function(args) {
+var Hash = ___rootObj.Hash = function(args) {
     if(this instanceof arguments.callee) {
         this.init.apply(this, args && args.callee ? args : arguments);
     } else {
@@ -19,7 +26,7 @@ var Hash = window.Hash = function(args) {
 };
 
 Hash.no_conflict = function() {
-    window.Hash = _Hash;
+    ___rootObj.Hash = _Hash;
     return Hash;
 };
 
@@ -67,7 +74,7 @@ Hash.prototype = {
      * @param {String} key Key to set.
      * @param {Object} val Value to set it to.
      */
-    put: function(key, val) {
+    set: function(key, val) {
         if(!this.contains(key)) {
             this.length++;
         }
@@ -98,7 +105,7 @@ Hash.prototype = {
     ensure: function(key, default_val) {
         var current_val = this.get(key);
         if(current_val === undefined) {
-            return this.put(key, default_val);
+            return this.set(key, default_val);
         }
         return current_val;
     },
@@ -117,13 +124,13 @@ Hash.prototype = {
     lazy_ensure: function(key, default_fn) {
         var current_val = this.get(key);
         if(current_val === undefined) {
-            return this.put(key, default_fn(key));
+            return this.set(key, default_fn(key));
         }
         return current_val;
     },
 
     /**
-     * Removes and returns the specified key.
+     * Removes the specified key and returns its value.
      * 
      * @member Hash
      */
@@ -131,6 +138,20 @@ Hash.prototype = {
         var current_val = this.get(key);
         this.remove(key);
         return current_val;
+    },
+
+    /**
+     * Removes and returns an arbitrary key value pair.
+     * 
+     * @member Hash
+     */
+    popitem: function() {
+        for (var prop in this.hash) {
+            var item = [prop, this.hash[prop]];
+            this.remove(prop);
+            break;
+        }
+        return item;
     },
 
     /**
@@ -143,7 +164,7 @@ Hash.prototype = {
     update: function(obj) {
         for(var prop in obj) {
             if(obj.hasOwnProperty(prop)) {
-                this.put(prop, obj[prop]);
+                this.set(prop, obj[prop]);
             }
         }
         return this;
